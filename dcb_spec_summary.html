@@ -1,0 +1,586 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+	<head>
+<!--
+Welcome to the Data Cookbook Specification Summary Viewer
+
+This is a single html file that uses javascript to invoke the Data Cookbook APIs to provide
+a summary of a specification and its related definitions.
+
+Follow these steps to make use of this viewer:
+
+1) Copy this html file onto an internal web server and test:
+
+		//
+		//   Identify a location for the dcb_spec_summary.html file on your internal web server.  
+		//   For example, it should be something like http://myserver/path/dcb_spec_summary.html
+		//
+		//   Test putting this URL into your browser:
+		//    
+		//    http://myserver/path/dcb_spec_summary.html?report_id=1456
+		//
+		//   That should show a web page and display the contents of a report specification from our demo account.  
+		//
+
+2) Configure for your account:
+		//  Change the following values to be your subdomain, a valid login and password (it is good to use a user that only has viewer privileges)
+-->
+<script>
+		DCB_SUBDOMAIN = 'idatau.demo';
+		DCB_USERNAME = 'guest';
+		DCB_PASSWORD = 'cookbook99';
+</script>
+<!--
+
+3) Test with an approved report OR any version from YOUR account.  Version IDs 
+	can be seen when you are looking at a specific version in the Data Cookbook.
+
+ approved report: http://myserver/path/dcb_spec_summary.html?report_id=9999
+ any version:     http://myserver/path/dcb_spec_summary.html?version_id=8888
+
+4)  Now we have a functioning specification summary viewer.  We can start to use it in one of two ways:
+
+ - Pop-up HTML link from any report:
+ <a href="#" onclick="javascript: newwindow=window.open('http://myserver/path/dcb_spec_summary.html?report_id=9999', 
+       'datacookbook', 'scrollbars=yes,center,height=450,width=500'); 
+       if (window.focus) {newwindow.focus();}">
+       View the Data Cookbook Information for this Report</a>
+ 
+ - IFRAME in a dashboard or portal:
+ <iframe src="http://myserver/path/dcb_spec_summary.html?report_id=9999" ></iframe>
+ 
+ 
+5) Modify the javascript below to ADD or REMOVE elements from display. 
+
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+	<head>
+		<title>Data Cookbook Report Viewer</title>
+
+		<style>
+			body {
+				background:#003355; 
+				color:#555; 
+				font-family: Arial, Helvetica, sans-serif; 
+				font-size:75%; 
+				font-style:normal; 
+				font-variant:normal; 
+				font-weight:normal; 
+			}
+
+			/* this is the result window */
+			.smallbox { 
+				width:450px; 
+				float:left; 
+				background:#FFFFFF; 
+			}
+
+			/* contains section titles as H2 and raw text for the descriptions */
+			.reportBody {	}
+			/* report name */
+			.reportBody h1 {margin: 0px 0px 0px 5px;}
+			/* section headings */
+			.reportBody h2 {margin: 10px 0px 0px 10px;}
+			/* term names */
+			.reportBody h3 {margin: 5px 0px 0px 15px;}
+			/* term definitions and general text */
+			.reportBody p {margin: 0px 5px 0px 15px;}
+
+			/********** LINK STYLES **********/
+
+			a:link, a:visited {text-decoration:none; color:#0000ff;}
+			a:hover {text-decoration: underline;}
+		</style>
+
+		<!-- Meta Data: Begin -->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="-1" />
+		<!-- Meta Data: End -->
+
+	</head>
+
+	<body>
+		<div class="smallbox">
+			<div id="dcb_report_lookup_results" name="dcb_report_lookup_results" style="display:none;">
+				<div class="viewHeader"></div>
+				<div class="viewBody"></div>
+			</div>
+			<div id="dcb_report_termlist_results" name="dcb_report_termlist_results" style="display:none;">
+				<div class="viewHeader"></div>
+				<div class="viewBody"></div>
+			</div>
+		</div>
+	</body>
+
+	<script>
+		/////////////////////////////////////////////////////////////////////////////////////
+		// 
+		// Get the arguments from the URL
+		// 
+		var url_parms = get_url_params(window.location.href);
+		var match_type = '';
+		var match_id = '';
+		
+		if (url_parms.report_id!==undefined) { 
+			match_type = 'report_id';
+			match_id = url_parms.report_id;
+		} else {
+			if (url_parms.version_id!==undefined) {
+				match_type = 'version_id';
+				match_id = url_parms.version_id;
+			}
+		}
+
+		//
+		DCB_BASE_URL = 'https://' + DCB_SUBDOMAIN + '.datacookbook.com';
+		//
+		// Constants for HTML
+		//
+		DCB_REPORT_LOOKUP_DIV = 'dcb_report_lookup_results';
+		DCB_REPORT_TERMLIST_DIV = 'dcb_report_termlist_results';
+		//
+		// Constants for CSS
+		//
+		DCB_REPORT_BODY_CLASS = 'reportBody';
+
+		if (match_id.length>0) {
+			/////////////////////////////////////////////////////////////////////////////////////
+			//
+			// get report info
+			//
+			request = new dcb_serviceRequest();
+			request.requestType = 'report_lookup';
+			request.service_url = DCB_BASE_URL + '/institution/reports/lookup';
+			request.lookup = match_id;
+			request.matchType = match_type;
+			request.submitRequest();
+
+			/////////////////////////////////////////////////////////////////////////////////////
+			//
+			// get report term list
+			//
+			request = new dcb_serviceRequest();
+			request.requestType = 'report_termlist';
+			request.service_url = DCB_BASE_URL + '/institution/reports/lookup';
+			request.lookup = match_id
+			request.matchType = match_type;
+			request.submitRequest();
+		} else {
+			resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
+			resultsElement.style.display = "block";
+			resultsElement.appendChild(document.createTextNode("Error: No specification ID provided.  A specification ID must be provided as a parameter in the URL.  Either ?report_id=9999 (for an approved specification), or ?version_id=8888 (for any specification version) needs to be added to the URL."));
+		}
+
+		/////////////////////////////////////////////////////////////////////////////////////
+		//
+		// Generic function used for debugging
+		//
+		function printObject(o) {
+		  var out = '';
+		  for (var p in o) {
+			out += p + ': ' + o[p] + '\n';
+		  }
+		  alert(out);
+		}
+
+		//
+		// Function to parse GET parameters from URL
+		//
+		function get_url_params(u){
+			var theURL = u;
+			var JS_GET = new Object();
+			var splitURL = theURL.split('?');
+	
+			if(splitURL.length>1){
+				var splitVars = splitURL[1].split('&');
+				for(i=0; i< splitVars.length; i++){
+					splitPair = splitVars[i].split('=');
+					JS_GET[splitPair[0]] = splitPair[1];
+				}//end for
+				return JS_GET;
+			}//end if
+			else{
+				return false;
+			}
+		}
+		//end get_url_params
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		// main handler function for responses
+		//
+		function dcb_processResponse( data_IN ) {
+			// declare variables
+			//alert('processing a response');
+			var responseCode = '';
+			var responseMessage = '';
+			var requestType = '';
+			//
+			// variables for building up the content to insert into HTML
+			//
+			var resultsElement = '';   // div to store the results
+			var headerElement = '';
+			var headerTextElement = null;
+			var headerLinkElement = null;
+			var bodyElement = '';
+			//
+			// get response status
+			//
+			responseCode = data_IN.ResponseStatus.ResponseCode;
+			responseMessage = data_IN.ResponseStatus.ResponseMessage;
+			if ( responseCode == 0 ) {
+				// success.  Get request type to see what we need to do now.
+				requestType = data_IN.ServiceName;
+				if ( requestType != '' ) {
+					switch (requestType) {
+						case 'report_lookup':
+							//alert('processing report_lookup');
+							//
+							// Find the existing DIV, hide it, then clear it
+							//
+							resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
+							resultsElement.style.display = "none";
+	
+							if (!(data_IN.ReportList[0] == null)) {
+								//
+								// construct the body div for REPORT NAME/LINK, PURPOSE, DESCRIPTION
+								//
+								bodyElement = document.createElement( "div" );
+								bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
+								// add a br to body div
+								bodyElement.appendChild( document.createElement( "br" ) )
+						
+									// construct header tag
+									headerTextElement = document.createElement( "h1" );
+							
+										// construct link to report
+										headerLinkElement = document.createElement("a");
+										headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+data_IN.ReportList[0].Report.report_id);
+										headerLinkElement.setAttribute("target","_blank");
+										headerLinkElement.appendChild( document.createTextNode(data_IN.ReportList[0].Report.name) );
+							
+									// add link to header tag
+									headerTextElement.appendChild( headerLinkElement);
+								// add header tag to body div
+								bodyElement.appendChild( headerTextElement );
+
+									// construct section title
+									headerTextElement = document.createElement( "h2" );
+									headerTextElement.appendChild( document.createTextNode("Purpose") );
+								// add section title to body div
+								bodyElement.appendChild( headerTextElement );
+
+									// add functional definition to body div
+									headerTextElement = document.createElement( "p" );
+									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.purpose)  );
+								// add report purpose to body div 
+								bodyElement.appendChild( headerTextElement );
+
+									// construct section title
+									headerTextElement = document.createElement( "h2" );
+									headerTextElement.appendChild( document.createTextNode("Description") );
+								// add section title to body div
+								bodyElement.appendChild( headerTextElement );
+
+									// add functional definition to body div
+									headerTextElement = document.createElement( "p" );
+									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.description)  );
+								// add report description to body div 
+								bodyElement.appendChild( headerTextElement );
+
+									// construct section title
+									headerTextElement = document.createElement( "h2" );
+									headerTextElement.appendChild( document.createTextNode("Owner") );
+								// add section title to body div
+								bodyElement.appendChild( headerTextElement );
+
+									// add functional definition to body div
+									headerTextElement = document.createElement( "p" );
+									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.owner)  );
+								// add term definition to body div 
+								bodyElement.appendChild( headerTextElement );
+
+									// construct section title
+									headerTextElement = document.createElement( "h2" );
+									headerTextElement.appendChild( document.createTextNode("Access Details") );
+								// add section title to body div
+								bodyElement.appendChild( headerTextElement );
+
+									// add functional definition to body div
+									headerTextElement = document.createElement( "p" );
+									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.access_details)  );
+								// add term definition to body div 
+								bodyElement.appendChild( headerTextElement );
+
+
+
+								// add body div to results
+								resultsElement.appendChild( bodyElement );
+								//printObject(bodyElement);
+						
+							}
+							else {
+								// no results
+								resultsElement.appendChild(document.createTextNode("No results found."));
+							}
+							// done with the loop, so make visible
+							resultsElement.style.display = "block";
+							break;
+					
+						case 'report_termlist':
+							//
+							// Find the existing DIV, hide it, then clear it
+							//
+							resultsElement = document.getElementById(DCB_REPORT_TERMLIST_DIV);
+							resultsElement.style.display = "none";
+							resultsElement.innerHTML = "";
+	
+							if (!(data_IN.TermList[0] == null)) {
+					
+								//
+								// construct the body div for TERM NAMES/DESCRIPTIONS
+								//
+								bodyElement = document.createElement( "div" );
+								bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
+								// construct header tag
+								headerTextElement = document.createElement( "h2" );
+								headerTextElement.appendChild( document.createTextNode("Related Definitions") );
+								// add header tag to body div
+								bodyElement.appendChild( headerTextElement );
+						
+								//
+								// Loop through all results showing information for each term
+								//
+								for (var termIndex in data_IN.TermList) {
+									var termItem = data_IN.TermList[termIndex].Term;
+	
+									// construct URL element
+									headerLinkElement = document.createElement("a");
+									headerLinkElement.setAttribute("href",termItem.perma_link_url);
+									headerLinkElement.setAttribute("target","_blank");
+									headerLinkElement.appendChild( document.createTextNode(termItem.name) );
+	
+									// construct term heading
+									headerTextElement = document.createElement( "h3" );
+									headerTextElement.appendChild(headerLinkElement);
+									// add termname to body div 
+									bodyElement.appendChild( headerTextElement );
+
+									// add functional definition to body div
+									headerTextElement = document.createElement( "p" );
+									headerTextElement.appendChild( document.createTextNode( termItem.term_functional_definition) );
+									// add term definition to body div 
+									bodyElement.appendChild( headerTextElement );
+								}
+
+								// add body div to results
+								resultsElement.appendChild( bodyElement );
+								//printObject(bodyElement);
+		
+							}
+							else {
+								// no results
+								resultsElement.appendChild(document.createTextNode("No results found."));
+							}
+							// done with the loop, so make visible
+							resultsElement.style.display = "block";
+							break;
+	
+						default:
+							alert( "Error processing Data Cookbook service request: Service " + requestType + " unknown.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+					} 
+				}
+				else {
+					//-- no request type in response - which service? --//
+					// no request type returned.  Error.
+					alert( "Error processing Data Cookbook service request: No service type returned.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+				}
+			}
+			else {
+				//-- error response code returned --//
+				// error.  Output alert, do nothing.
+				alert( "Error processing Data Cookbook service request:  Error code returned.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+			}
+
+		}
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		// Main class definition for an API call
+		//
+		function dcb_serviceRequest() {
+			//
+			// these are standard for every instance of this class
+			// each one must also be represented in the createRequestURL function
+			//
+			//alert('service request for: ' + DCB_SUBDOMAIN + ' as: ' + DCB_USERNAME);
+			this.token = '';
+			this.username = DCB_USERNAME;
+			this.password = DCB_PASSWORD;
+			this.outputFormat = 'json';
+			this.jsonFunction = 'dcb_processResponse';
+			this.jsonVariable = '';
+			//
+			// these should be set based on form data when creating an instance
+			//
+			this.requestType = '';
+			this.lookup = '';
+			this.search = '';
+			this.matchType = '';
+			this.service_url = '';
+			//
+			// specific to term list API
+			//
+			this.status = '';
+			this.dataSystem = '';
+			this.functionalArea = '';
+			this.termSource = '';
+			this.tag = '';
+	
+			// 
+			// Pieces together the arguments for the request URL
+			//
+			this.createRequestURL = function() {
+				// initialize the variable to hold the complete URL being constructed
+				var URL_OUT = this.service_url;
+
+				// set the first paramater prefix, after the first one, a & will be used.
+				var paramPrefix = '?';
+
+				// see what properties have values, append those with values.
+
+				if ( this.requestType != '' ) {
+					URL_OUT += paramPrefix + "requestType=" + this.requestType;
+					paramPrefix = '&';
+				}
+				if ( this.username != '' ) {
+					URL_OUT += paramPrefix + "un=" + this.username;
+					paramPrefix = '&';
+				}
+				if ( this.token != '' ) {
+					URL_OUT += paramPrefix + "OR=" + this.token;
+					paramPrefix = '&';
+				}
+				if ( this.password != '' ) {
+					URL_OUT += paramPrefix + "pw=" + this.password;
+					paramPrefix = '&';
+				}
+				if ( this.outputFormat != '' ) {
+					URL_OUT += paramPrefix + "outputFormat=" + this.outputFormat;
+					paramPrefix = '&';
+				}
+				if ( this.jsonFunction != '' ) {
+					URL_OUT += paramPrefix + "jsonFunction=" + this.jsonFunction;
+					paramPrefix = '&';
+				}
+				if ( this.jsonVariable != '' ) {
+					URL_OUT += paramPrefix + "jsonVariable=" + this.jsonVariable;
+					paramPrefix = '&';
+				}
+				if ( this.matchType != '' ) {
+					URL_OUT += paramPrefix + "matchType=" + this.matchType;
+					paramPrefix = '&';
+				}
+				if ( this.lookup != '' ) {
+					URL_OUT += paramPrefix + "lookup=" + this.lookup;
+					paramPrefix = '&';
+				}
+				if ( this.search != '' ) {
+					URL_OUT += paramPrefix + "search=" + this.search;
+					paramPrefix = '&';
+				}
+				//
+				// term list specific ones
+				//
+				if ( this.status != '' ) {
+					URL_OUT += paramPrefix + "status=" + this.status;
+					paramPrefix = '&';
+				}
+				if ( this.dataSystem != '' ) {
+					URL_OUT += paramPrefix + "dataSystem=" + this.dataSystem;
+					paramPrefix = '&';
+				}
+				if ( this.functionalArea != '' ) {
+					URL_OUT += paramPrefix + "functionalArea=" + this.functionalArea;
+					paramPrefix = '&';
+				}
+				if ( this.termSource != '' ) {
+					URL_OUT += paramPrefix + "termSource=" + this.termSource;
+					paramPrefix = '&';
+				}
+				if ( this.tag != '' ) {
+					URL_OUT += paramPrefix + "tag=" + this.tag;
+					paramPrefix = '&';
+				}
+
+				return URL_OUT;
+			};
+
+			//
+			// Outputs contents of this object as a string.
+			//
+			// @return string - contents of this object.	
+			//
+			this.outputContents = function() {
+				// return reference
+				var string_OUT = '';
+
+				// declare variables
+				var currentPropName = '';
+				var outputArray = new Array();
+				var itemCount = 0;
+				var currentValue = '';
+				var currentValueType = '';
+
+				// loop over properties
+				for( currentPropName in this ) {
+					// add current property to output array
+					currentValue = this[ currentPropName ];
+
+					// only output strings, numbers, and booleans.
+					currentValueType = typeof( currentValue );
+					if ( ( currentValueType == "string" ) || ( currentValueType == "number" ) || ( currentValueType == "boolean" ) ) {
+						outputArray[ itemCount ] = currentPropName + "=\"" + this[ currentPropName ] + "\"";
+						itemCount++;
+					}
+				}
+				// join the items in array together with "; ".
+				string_OUT = outputArray.join( ";\n " );
+				// append name of this class to the front.
+				string_OUT = "Contents of service request: " + string_OUT;
+				return string_OUT;
+			};
+
+			//
+			// Uses variables internal to this object to create the URL of the JSONP
+			// javascript include service for our request, then writes the request
+			// into a script tag at the end of the document
+			//
+			this.submitRequest = function() {
+				// declare variables
+				var requestURL = '';
+				var scriptElement = null;
+
+				// get request URL
+				requestURL = this.createRequestURL();
+				//alert('URL created: ' + requestURL);
+		
+				//
+				// Insert the script into the document body
+				//		
+				scriptElement = document.createElement( "script" );
+				scriptElement.setAttribute( "src", requestURL );
+				scriptElement.setAttribute( "type", "text/javascript" );
+				document.body.appendChild( scriptElement );
+			};
+
+		}
+	</script>
+</html>
