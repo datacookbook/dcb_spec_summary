@@ -42,9 +42,9 @@ Follow these steps to make use of this viewer:
 4)  Now we have a functioning specification summary viewer.  We can start to use it in one of two ways:
 
  - Pop-up HTML link from any report:
- <a href="#" onclick="javascript: newwindow=window.open('http://myserver/path/dcb_spec_summary.html?report_id=9999', 
-       'datacookbook', 'scrollbars=yes,center,height=450,width=500'); 
-       if (window.focus) {newwindow.focus();}">
+ <a href="http://myserver/path/dcb_spec_summary.html?report_id=9999" 
+ onclick="javascript:void window.open('http://myserver/path/dcb_spec_summary.html?report_id=9999', 
+       'datacookbook', 'scrollbars=yes,center,height=450,width=500'); return false;">
        View the Data Cookbook Information for this Report</a>
  
  - IFRAME in a dashboard or portal:
@@ -110,6 +110,7 @@ Follow these steps to make use of this viewer:
 				<div class="viewBody"></div>
 			</div>
 			<div id="dcb_report_termlist_results" name="dcb_report_termlist_results" style="display:none;">
+				<h2>Loading results...</h2>
 				<div class="viewHeader"></div>
 				<div class="viewBody"></div>
 			</div>
