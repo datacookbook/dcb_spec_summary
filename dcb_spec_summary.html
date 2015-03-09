@@ -23,6 +23,7 @@ Follow these steps to make use of this viewer:
 		//   That should show a web page and display the contents of a report specification from our demo account.  
 		//
 
+
 2) Configure for your account:
 		//  Change the following values to be your subdomain, a valid login and password (it is good to use a user that only has viewer privileges)
 -->
@@ -30,6 +31,9 @@ Follow these steps to make use of this viewer:
 		DCB_SUBDOMAIN = 'idatau.demo';
 		DCB_USERNAME = 'guest';
 		DCB_PASSWORD = 'cookbook99';
+		//
+		// no need to change this line
+		DCB_BASE_URL = 'https://' + DCB_SUBDOMAIN + '.datacookbook.com';
 </script>
 <!--
 
@@ -44,7 +48,7 @@ Follow these steps to make use of this viewer:
  - Pop-up HTML link from any report:
  <a href="http://myserver/path/dcb_spec_summary.html?report_id=9999" 
  onclick="javascript:void window.open('http://myserver/path/dcb_spec_summary.html?report_id=9999', 
-       'datacookbook', 'scrollbars=yes,center,height=450,width=500'); return false;">
+       'datacookbook', 'scrollbars=yes,center,height=600,width=400'); return false;">
        View the Data Cookbook Information for this Report</a>
  
  - IFRAME in a dashboard or portal:
@@ -68,10 +72,9 @@ Follow these steps to make use of this viewer:
 				font-variant:normal; 
 				font-weight:normal; 
 			}
-
 			/* this is the result window */
 			.smallbox { 
-				width:450px; 
+				width:380px; 
 				float:left; 
 				background:#FFFFFF; 
 			}
@@ -89,7 +92,7 @@ Follow these steps to make use of this viewer:
 
 			/********** LINK STYLES **********/
 
-			a:link, a:visited {text-decoration:none; color:#0000ff;}
+			a:link, a:visited {text-decoration:none; color:#9f0000;}
 			a:hover {text-decoration: underline;}
 		</style>
 
@@ -103,6 +106,11 @@ Follow these steps to make use of this viewer:
 
 	<body>
 		<div class="smallbox">
+			<div>
+				<div style="float:left; min-width:160px; min-height:70px;"><img src="https://community.datacookbook.com/images/logo.jpg" width="150"/></div>
+				<div style="float:left; min-width:120px; max-height:70px; margin-top:40px;">Specification</div>
+				<div style="float:left; min-width:100px; min-height:70px; margin-top:10px; display:none; " id="dcb_report_links" name="dcb_report_links" ></div>
+			</div>
 			<div id="dcb_report_lookup_results" name="dcb_report_lookup_results" style="display:none;">
 				<div class="viewHeader"></div>
 				<div class="viewBody"></div>
@@ -123,28 +131,54 @@ Follow these steps to make use of this viewer:
 		var url_parms = get_url_params(window.location.href);
 		var match_type = '';
 		var match_id = '';
-		
-		if (url_parms.report_id!==undefined) { 
-			match_type = 'report_id';
-			match_id = url_parms.report_id;
-		} else {
-			if (url_parms.version_id!==undefined) {
-				match_type = 'version_id';
-				match_id = url_parms.version_id;
-			}
-		}
-
-		//
-		DCB_BASE_URL = 'https://' + DCB_SUBDOMAIN + '.datacookbook.com';
 		//
 		// Constants for HTML
 		//
 		DCB_REPORT_LOOKUP_DIV = 'dcb_report_lookup_results';
 		DCB_REPORT_TERMLIST_DIV = 'dcb_report_termlist_results';
+		DCB_REPORT_LINKS = 'dcb_report_links';
 		//
 		// Constants for CSS
 		//
 		DCB_REPORT_BODY_CLASS = 'reportBody';
+		
+		if (url_parms.report_id!==undefined) { 
+			match_type = 'report_id';
+			match_id = url_parms.report_id;
+			resultsElement = document.getElementById(DCB_REPORT_LINKS);
+			resultsElement.style.display = "block";
+
+			headerLinkElement = document.createElement("a");
+			headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+match_id);
+			headerLinkElement.setAttribute("target","_blank");
+			headerLinkElement.appendChild( document.createTextNode("view details") );
+			resultsElement.appendChild(headerLinkElement);
+			resultsElement.appendChild(document.createElement( "br" ));
+
+			headerLinkElement = document.createElement("a");
+			headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+match_id+"#new_comment");
+			headerLinkElement.setAttribute("target","_blank");
+			headerLinkElement.appendChild( document.createTextNode("comments") );
+			resultsElement.appendChild(headerLinkElement);
+			resultsElement.appendChild(document.createElement( "br" ));
+
+			headerLinkElement = document.createElement("a");
+			headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+match_id+"/changes/new");
+			headerLinkElement.setAttribute("target","_blank");
+			headerLinkElement.appendChild( document.createTextNode("request a change") );
+			resultsElement.appendChild(headerLinkElement);
+			
+			
+		} else {
+			if (url_parms.version_id!==undefined) {
+				match_type = 'version_id';
+				match_id = url_parms.version_id;
+				resultsElement = document.getElementById(DCB_REPORT_LINKS);
+				resultsElement.style.display = "block";
+				resultsElement.appendChild(document.createTextNode("version view"));
+			}
+		}
+
 
 		if (match_id.length>0) {
 			/////////////////////////////////////////////////////////////////////////////////////
@@ -309,13 +343,13 @@ Follow these steps to make use of this viewer:
 									headerTextElement = document.createElement( "h2" );
 									headerTextElement.appendChild( document.createTextNode("Access Details") );
 								// add section title to body div
-								bodyElement.appendChild( headerTextElement );
+								// bodyElement.appendChild( headerTextElement );
 
 									// add functional definition to body div
 									headerTextElement = document.createElement( "p" );
 									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.access_details)  );
 								// add term definition to body div 
-								bodyElement.appendChild( headerTextElement );
+								// bodyElement.appendChild( headerTextElement );
 
 
 
@@ -392,19 +426,21 @@ Follow these steps to make use of this viewer:
 							break;
 	
 						default:
-							alert( "Error processing Data Cookbook service request: Service " + requestType + " unknown.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+							resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
+							resultsElement.appendChild(document.createTextNode("Request Type {" + requestType + "} unknown.  No results found."));
+							resultsElement.style.display = "block";
 					} 
 				}
 				else {
-					//-- no request type in response - which service? --//
-					// no request type returned.  Error.
-					alert( "Error processing Data Cookbook service request: No service type returned.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+					resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
+					resultsElement.appendChild(document.createTextNode("Invalid response from service.  No results found."));
+					resultsElement.style.display = "block";
 				}
 			}
 			else {
-				//-- error response code returned --//
-				// error.  Output alert, do nothing.
-				alert( "Error processing Data Cookbook service request:  Error code returned.  ResponseCode: " + responseCode + "; ResponseMessage: " + responseMessage );
+				resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
+				resultsElement.appendChild(document.createTextNode("Error Received from service.  No results found."));
+				resultsElement.style.display = "block";
 			}
 
 		}
