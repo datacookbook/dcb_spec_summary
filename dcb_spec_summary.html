@@ -117,14 +117,9 @@ Follow these steps to make use of this viewer:
 				<div style="float:left; min-width:120px; max-height:70px; margin-top:40px;">Specification</div>
 				<div style="float:left; min-width:100px; min-height:70px; margin-top:10px; display:none; " id="dcb_report_links" name="dcb_report_links" ></div>
 			</div>
-			<div id="dcb_report_lookup_results" name="dcb_report_lookup_results" style="display:none;">
-				<div class="viewHeader"></div>
-				<div class="viewBody"></div>
-			</div>
+			<div id="dcb_report_lookup_results" name="dcb_report_lookup_results" style="display:none;"></div>
 			<div id="dcb_report_termlist_results" name="dcb_report_termlist_results" style="display:none;">
 				<h2>Loading results...</h2>
-				<div class="viewHeader"></div>
-				<div class="viewBody"></div>
 			</div>
 		</div>
 	</body>
@@ -248,6 +243,123 @@ Follow these steps to make use of this viewer:
 		}
 		//end get_url_params
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		// DISPLAY THE SPECIFICATION DETAILS
+		//
+		function displayReportBody (Report) {
+			var headerTextElement = null;
+			var headerLinkElement = null;
+			var bodyElement = '';
+			
+			//
+			// construct the body div for REPORT NAME/LINK, PURPOSE, DESCRIPTION
+			//
+			bodyElement = document.createElement( "div" );
+			bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
+			bodyElement.appendChild( document.createElement( "br" ) )
+
+			//
+			// TITLE
+			//						
+			headerTextElement = document.createElement( "h1" );
+			headerLinkElement = document.createElement("a");
+			headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+Report.report_id);
+			headerLinkElement.setAttribute("target","_blank");
+			headerLinkElement.appendChild( document.createTextNode(Report.name) );							
+			headerTextElement.appendChild( headerLinkElement);
+			bodyElement.appendChild( headerTextElement );
+
+			//
+			// PURPOSE
+			//
+			headerTextElement = document.createElement( "h2" );
+			headerTextElement.appendChild( document.createTextNode("Purpose") );
+			bodyElement.appendChild( headerTextElement );
+			headerTextElement = document.createElement( "p" );
+			headerTextElement.innerHTML = Report.purpose;
+			bodyElement.appendChild( headerTextElement );
+
+			//
+			// DESCRIPTION
+			//
+			headerTextElement = document.createElement( "h2" );
+			headerTextElement.appendChild( document.createTextNode("Description") );
+			bodyElement.appendChild( headerTextElement );
+			headerTextElement = document.createElement( "p" );
+			headerTextElement.innerHTML = Report.description;
+			bodyElement.appendChild( headerTextElement );
+
+			//
+			// OWNER
+			//
+			headerTextElement = document.createElement( "h2" );
+			headerTextElement.appendChild( document.createTextNode("Owner") );
+			bodyElement.appendChild( headerTextElement );
+			headerTextElement = document.createElement( "p" );
+			headerTextElement.innerHTML = Report.owner;
+			bodyElement.appendChild( headerTextElement );
+
+			//
+			// ACCESS DETAILS
+			//	
+			headerTextElement = document.createElement( "h2" );
+			headerTextElement.appendChild( document.createTextNode("Access Details") );
+			bodyElement.appendChild( headerTextElement );
+			headerTextElement = document.createElement( "p" );
+			headerTextElement.innerHTML = Report.access_details;
+			bodyElement.appendChild( headerTextElement );
+			
+			return bodyElement;
+		}
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+		//
+		// DISPLAY THE RELATED DEFINITIONS
+		//
+		function displayReportDefinitions (TermList) {
+			var headerTextElement = null;
+			var headerLinkElement = null;
+			var bodyElement = '';
+			//
+			// construct the body div for TERM NAMES/DESCRIPTIONS
+			//
+			bodyElement = document.createElement( "div" );
+			bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
+			// construct header tag
+			headerTextElement = document.createElement( "h2" );
+			headerTextElement.appendChild( document.createTextNode("Related Definitions") );
+			// add header tag to body div
+			bodyElement.appendChild( headerTextElement );
+	
+			//
+			// Loop through all results showing information for each term
+			//
+			for (var termIndex in TermList) {
+				var termItem = TermList[termIndex].Term;
+
+				//
+				// DEFINITION NAME/LINK
+				//
+				headerLinkElement = document.createElement("a");
+				headerLinkElement.setAttribute("href",termItem.perma_link_url);
+				headerLinkElement.setAttribute("target","_blank");
+				headerLinkElement.appendChild( document.createTextNode(termItem.name) );
+				headerTextElement = document.createElement( "h3" );
+				headerTextElement.appendChild(headerLinkElement);
+				bodyElement.appendChild( headerTextElement );
+
+				//
+				// FUNCTIONAL DEFINITION
+				//
+				headerTextElement = document.createElement( "p" );
+				headerTextElement.innerHTML = termItem.term_functional_definition;
+				bodyElement.appendChild( headerTextElement );
+			}
+			
+			return bodyElement;
+		
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,14 +372,7 @@ Follow these steps to make use of this viewer:
 			var responseCode = '';
 			var responseMessage = '';
 			var requestType = '';
-			//
-			// variables for building up the content to insert into HTML
-			//
 			var resultsElement = '';   // div to store the results
-			var headerElement = '';
-			var headerTextElement = null;
-			var headerLinkElement = null;
-			var bodyElement = '';
 			//
 			// get response status
 			//
@@ -285,84 +390,8 @@ Follow these steps to make use of this viewer:
 							//
 							resultsElement = document.getElementById(DCB_REPORT_LOOKUP_DIV);
 							resultsElement.style.display = "none";
-	
 							if (!(data_IN.ReportList[0] == null)) {
-								//
-								// construct the body div for REPORT NAME/LINK, PURPOSE, DESCRIPTION
-								//
-								bodyElement = document.createElement( "div" );
-								bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
-								// add a br to body div
-								bodyElement.appendChild( document.createElement( "br" ) )
-						
-									// construct header tag
-									headerTextElement = document.createElement( "h1" );
-							
-										// construct link to report
-										headerLinkElement = document.createElement("a");
-										headerLinkElement.setAttribute("href",DCB_BASE_URL + "/institution/reports/"+data_IN.ReportList[0].Report.report_id);
-										headerLinkElement.setAttribute("target","_blank");
-										headerLinkElement.appendChild( document.createTextNode(data_IN.ReportList[0].Report.name) );
-							
-									// add link to header tag
-									headerTextElement.appendChild( headerLinkElement);
-								// add header tag to body div
-								bodyElement.appendChild( headerTextElement );
-
-									// construct section title
-									headerTextElement = document.createElement( "h2" );
-									headerTextElement.appendChild( document.createTextNode("Purpose") );
-								// add section title to body div
-								bodyElement.appendChild( headerTextElement );
-
-									// add functional definition to body div
-									headerTextElement = document.createElement( "p" );
-									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.purpose)  );
-								// add report purpose to body div 
-								bodyElement.appendChild( headerTextElement );
-
-									// construct section title
-									headerTextElement = document.createElement( "h2" );
-									headerTextElement.appendChild( document.createTextNode("Description") );
-								// add section title to body div
-								bodyElement.appendChild( headerTextElement );
-
-									// add functional definition to body div
-									headerTextElement = document.createElement( "p" );
-									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.description)  );
-								// add report description to body div 
-								bodyElement.appendChild( headerTextElement );
-
-									// construct section title
-									headerTextElement = document.createElement( "h2" );
-									headerTextElement.appendChild( document.createTextNode("Owner") );
-								// add section title to body div
-								bodyElement.appendChild( headerTextElement );
-
-									// add functional definition to body div
-									headerTextElement = document.createElement( "p" );
-									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.owner)  );
-								// add term definition to body div 
-								bodyElement.appendChild( headerTextElement );
-
-									// construct section title
-									headerTextElement = document.createElement( "h2" );
-									headerTextElement.appendChild( document.createTextNode("Access Details") );
-								// add section title to body div
-								// bodyElement.appendChild( headerTextElement );
-
-									// add functional definition to body div
-									headerTextElement = document.createElement( "p" );
-									headerTextElement.appendChild( document.createTextNode( data_IN.ReportList[0].Report.access_details)  );
-								// add term definition to body div 
-								// bodyElement.appendChild( headerTextElement );
-
-
-
-								// add body div to results
-								resultsElement.appendChild( bodyElement );
-								//printObject(bodyElement);
-						
+								resultsElement.appendChild( displayReportBody(data_IN.ReportList[0].Report) );
 							}
 							else {
 								// no results
@@ -381,47 +410,7 @@ Follow these steps to make use of this viewer:
 							resultsElement.innerHTML = "";
 	
 							if (!(data_IN.TermList[0] == null)) {
-					
-								//
-								// construct the body div for TERM NAMES/DESCRIPTIONS
-								//
-								bodyElement = document.createElement( "div" );
-								bodyElement.setAttribute( "class", DCB_REPORT_BODY_CLASS );
-								// construct header tag
-								headerTextElement = document.createElement( "h2" );
-								headerTextElement.appendChild( document.createTextNode("Related Definitions") );
-								// add header tag to body div
-								bodyElement.appendChild( headerTextElement );
-						
-								//
-								// Loop through all results showing information for each term
-								//
-								for (var termIndex in data_IN.TermList) {
-									var termItem = data_IN.TermList[termIndex].Term;
-	
-									// construct URL element
-									headerLinkElement = document.createElement("a");
-									headerLinkElement.setAttribute("href",termItem.perma_link_url);
-									headerLinkElement.setAttribute("target","_blank");
-									headerLinkElement.appendChild( document.createTextNode(termItem.name) );
-	
-									// construct term heading
-									headerTextElement = document.createElement( "h3" );
-									headerTextElement.appendChild(headerLinkElement);
-									// add termname to body div 
-									bodyElement.appendChild( headerTextElement );
-
-									// add functional definition to body div
-									headerTextElement = document.createElement( "p" );
-									headerTextElement.appendChild( document.createTextNode( termItem.term_functional_definition) );
-									// add term definition to body div 
-									bodyElement.appendChild( headerTextElement );
-								}
-
-								// add body div to results
-								resultsElement.appendChild( bodyElement );
-								//printObject(bodyElement);
-		
+								resultsElement.appendChild( displayReportDefinitions(data_IN.TermList) );
 							}
 							else {
 								// no results
