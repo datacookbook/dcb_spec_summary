@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<style>
+	a.button {
+		text-decoration: none;
+		}
+	div.button 
+	{
+		width: 150px;
+		border: solid;
+		border-radius: 10px;
+		border-color: black;
+		background-color: white;
+		color: black;
+		text-align: center;
+		font-weight: bold;
+		padding: 5px;
+	}
+	div.button:hover
+	{
+		background-color: lightgreen;
+	}
+</style>
+<script language="JavaScript" type="text/javascript">
+	function get_url_params(u){
+		var theURL = u;
+		var JS_GET = new Object();
+		var splitURL = theURL.split('?');
+
+		if(splitURL.length>1) {
+			var splitVars = splitURL[1].split('&');
+			for(i=0; i< splitVars.length; i++){
+				splitPair = splitVars[i].split('=');
+				JS_GET[splitPair[0]] = splitPair[1];
+			}//end for
+			return JS_GET;
+		} else {
+			return false;
+		}
+	}
+
+	function open_dcb_spec_summary() {
+		var url_parms = get_url_params(location.href);
+		if (url_parms.report_id!==undefined) { 
+			window.open('dcb_spec_summary.html?report_id='+url_parms.report_id,'datacookbook','scrollbars=yes,center,height=600,width=450');
+		}
+		if (url_parms.version_id!==undefined) {
+			window.open('dcb_spec_summary.html?report_id='+url_parms.version_id,'datacookbook','scrollbars=yes,center,height=600,width=450');
+		}
+	}
+</script>
+
+</head>
+<body>
+	<a class="button" href="" onclick="open_dcb_spec_summary()"><div class="button"><img src="logo-small.png" width="150"/></div></a>
+</body>
+</html>
