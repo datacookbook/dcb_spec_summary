@@ -5,7 +5,7 @@
 // These first 2 methods of calling this require that the specification have at least
 // one APPROVED version:
 //
-// pass in one parameter, the report ID:               lookup=999 
+// pass in one parameter, the report ID:               lookup=999
 //
 // OR, if you want to use the name you can do :        lookup=Report Name&matchType=exact_text
 //
@@ -72,14 +72,15 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/reports/' . $item->{'report-id'} . '">';
 					}
 					$output .= '<div class="report_name">' . $item->name . '</div>';
-					if ($show_links) { 	
-						$output .= '</a>'; 
+					if ($show_links) {
+						$output .= '</a>';
 					}
 					$output .= 'Purpose<div class="report_purpose">' . $item->purpose . '</div>';
 					$output .= 'Description<div class="report_description">' . $item->description . '</div>';
 					$output .= '<div class="report_owner"><b>Owner: </b>' . $item->owner . '</div>';
 					$output .= '<div class="report_data_system"><b>Data System: </b>' . $item->{'data-system'} . '</div>';
-					$output .= 'Access Details<div class="report_access_details">' . $item->{'access-details'} . '</div>';
+					// Access Details
+					// $output .= 'Access Details<div class="report_access_details">' . $item->{'access-details'} . '</div>';
 				}
 			}
 			$output .= '</div>';
@@ -104,7 +105,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 			}
 			$output .= '</div>';
 		}
-	}	
+	}
 	return $output;
 }
 
@@ -125,7 +126,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 	}
 	a {
 		color: #993333;
-		text-decoration: none;	
+		text-decoration: none;
 	}
 	.api_container {
 		font-family: arial;
@@ -133,7 +134,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 		width: 400px;
 		background-color: #eeeeee;
 		border: solid;
-	
+
 	}
 	.report_section {
 		margin: 5px;
@@ -141,7 +142,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 	.report_header {
 		font-size: 12px;
 	}
-	
+
 	.report_name {
 		font-weight: bold;
 	}
@@ -193,7 +194,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 	a.button {
 		text-decoration: none;
 		}
-	div.button 
+	div.button
 	{
 		width: 150px;
 		border: solid;
@@ -246,13 +247,13 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 		if (url_parms.lookup!==undefined) {
 			if (url_parms.matchType!==undefined) {
 				window.open('dcb_spec_summary.php?lookup='+url_parms.lookup+'&matchType='+url_parms.matchType,'datacookbook','scrollbars=yes,center,height=600,width=450');
-			} else {		
+			} else {
 				window.open('dcb_spec_summary.php?lookup='+url_parms.lookup,'datacookbook','scrollbars=yes,center,height=600,width=450');
 			}
 		}
 		*/
 		window.open(url,'datacookbook','scrollbars=yes,center,height=600,width=450');
-		
+
 	}
 </script>
 </head>
@@ -298,13 +299,13 @@ if (isset($_GET['button'])) {
 	$result = call_api($url);
 	//echo '<br>processing term information...';
 	//echo '</span>';
-	
-	
+
+
 	$term_output = display_results($requestType, $subdomain, $result, $show_links);
 	echo $report_output;
 	echo $term_output;
 	echo '</div>';
-	
+
 }
 
 
