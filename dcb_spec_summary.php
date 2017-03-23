@@ -383,11 +383,17 @@ function call_api($url) {
 	//
 	// Now invoke the API and receive results
 	//
+	$url_split = explode('?',$url);
+	$base_url = $url_split[0];
+	$post_args = $url_split[1];
 	$ch = curl_init();
 	// Will return the response, if false it print the response
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	// Set the url
-	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_URL, $base_url);
+	// Add POST arguments for extra security
+	curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_args);
 	// Execute
 	$result=curl_exec($ch);
 	curl_close($ch);
