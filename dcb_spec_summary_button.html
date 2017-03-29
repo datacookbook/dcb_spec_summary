@@ -6,7 +6,7 @@
 	a.button {
 		text-decoration: none;
 		}
-	div.button 
+	div.button
 	{
 		width: 150px;
 		border: solid;
@@ -20,7 +20,7 @@
 	}
 	div.button:hover
 	{
-		background-color: lightgreen;
+		background-color: #C3D751;
 	}
 </style>
 <script language="JavaScript" type="text/javascript">
@@ -43,7 +43,7 @@
 
 	function open_dcb_spec_summary() {
 		var url_parms = get_url_params(location.href);
-		if (url_parms.report_id!==undefined) { 
+		if (url_parms.report_id!==undefined) {
 			window.open('dcb_spec_summary.html?report_id='+url_parms.report_id,'datacookbook','scrollbars=yes,center,height=600,width=450');
 		}
 		if (url_parms.version_id!==undefined) {

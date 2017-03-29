@@ -22,17 +22,18 @@ $subdomain = 'idatau.demo';
 $un = 'guest';
 $pw = 'cookbook99';
 
-
-
-
-
+///////////////////////////////////////////////////////////////////////
+//
+// for alternate instances
+//
+$full_domain = 'https://' . $subdomain . '.datacookbook.com';
 
 
 ///////////////////////////////////////////////////////////////////////
 //
 // Modify this function to change what is displayed and how
 //
-function display_results($requestType, $subdomain, $result, $show_links) {
+function display_results($requestType, $full_domain, $result, $show_links) {
 	$output = '';
 	//
 	// Parse the XML response and check for an error
@@ -53,23 +54,23 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 			} else {
 				foreach ($result_list->children() as $item) {
 					$output .= '<div class="report_header">';
-					$output .= '<div style="float:left; min-width:160px; min-height:70px;"><img src="HTTP://www.datacookbook.com/wp-content/uploads/logo.gif" width="150"/></div>';
-					$output .= '<div style="float:left; min-width:120px; max-height:70px; margin-top:40px;">Specification</div>';
-					$output .= '<div style="float:left; min-width:100px; min-height:70px; margin-top:10px;" id="dcb_report_links" name="dcb_report_links" >';
+					$output .= '<div style="float:left; margin-top: 10px; min-width:160px; min-height:60px;"><img src="HTTP://www.datacookbook.com/wp-content/uploads/logo.gif" width="150"/></div>';
+					$output .= '<div style="float:left; min-width:120px; max-height:60px; margin-top:40px;">Specification</div>';
+					$output .= '<div style="float:left; min-width:100px; min-height:60px; margin-top:10px;" id="dcb_report_links" name="dcb_report_links" >';
 					if ($show_links) {
 						// spec links
-						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/reports/' . $item->{'report-id'} . '">';
+						$output .= '<a target="_blank" href="' . $full_domain . '/institution/reports/' . $item->{'report-id'} . '">';
 						$output .= 'view details</a><br>';
-						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/reports/' . $item->{'report-id'} . '#new_comment">';
+						$output .= '<a target="_blank" href="' . $full_domain . '/institution/reports/' . $item->{'report-id'} . '#new_comment">';
 						$output .= 'comments</a><br>';
-						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/reports/' . $item->{'report-id'} . '/changes/new">';
+						$output .= '<a target="_blank" href="' . $full_domain . '/institution/reports/' . $item->{'report-id'} . '/changes/new">';
 						$output .= 'request a change</a><br>';
 					}
 					$output .= '</div>';
 					$output .= '</div>';
 
 					if ($show_links) {
-						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/reports/' . $item->{'report-id'} . '">';
+						$output .= '<a target="_blank" href="' . $full_domain . '/institution/reports/' . $item->{'report-id'} . '">';
 					}
 					$output .= '<div class="report_name">' . $item->name . '</div>';
 					if ($show_links) {
@@ -93,7 +94,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 				foreach ($result_list->children() as $item) {
 					$output .= '<div class="term_container">';
 					if ($show_links) {
-						$output .= '<a target="_blank" href="https://' . $subdomain . '.datacookbook.com/institution/terms/' . $item->{'term-id'} . '">';
+						$output .= '<a target="_blank" href="https://' . $full_domain . '.datacookbook.com/institution/terms/' . $item->{'term-id'} . '">';
 						$output .= '<div class="term_name">' . $item->name . '</div>';
 						$output .= '</a>';
 					} else {
@@ -208,7 +209,7 @@ function display_results($requestType, $subdomain, $result, $show_links) {
 	}
 	div.button:hover
 	{
-		background-color: lightgreen;
+		background-color: #C3D751;
 	}
 
 </style>
@@ -286,22 +287,22 @@ if (isset($_GET['button'])) {
 	//
 	$requestType = 'report_lookup';
 	//echo 'contacting Data Cookbook...';
-	$url = build_request_url($requestType, $base_args, $subdomain);
+	$url = build_request_url($requestType, $base_args, $full_domain);
 	$result = call_api($url);
 	//echo '<br>processing report information...';
-	$report_output = display_results($requestType, $subdomain, $result, $show_links);
+	$report_output = display_results($requestType, $full_domain, $result, $show_links);
 	//
 	// Gather All Related Definitions
 	//
 	$requestType = 'report_termlist';
 	//echo '<br>getting definitions...';
-	$url = build_request_url($requestType, $base_args, $subdomain);
+	$url = build_request_url($requestType, $base_args, $full_domain);
 	$result = call_api($url);
 	//echo '<br>processing term information...';
 	//echo '</span>';
 
 
-	$term_output = display_results($requestType, $subdomain, $result, $show_links);
+	$term_output = display_results($requestType, $full_domain, $result, $show_links);
 	echo $report_output;
 	echo $term_output;
 	echo '</div>';
@@ -314,7 +315,7 @@ if (isset($_GET['button'])) {
 // Leave these routines alone
 //////////////////////////////////////////////////////////////////////////////////
 
-function build_request_url($requestType, $base_args, $subdomain) {
+function build_request_url($requestType, $base_args, $full_domain) {
 
 	$required_args = array();
 	$optional_args = array();
@@ -357,7 +358,7 @@ function build_request_url($requestType, $base_args, $subdomain) {
 	//
 	// Set basic URL
 	//
-	$url = 'https://' . $subdomain . '.datacookbook.com' . $api_path . $base_args . '&requestType=' . $requestType;
+	$url = $full_domain . $api_path . $base_args . '&requestType=' . $requestType;
 	//
 	// Add Required arguments
 	//
