@@ -94,7 +94,7 @@ function display_results($requestType, $full_domain, $result, $show_links) {
 				foreach ($result_list->children() as $item) {
 					$output .= '<div class="term_container">';
 					if ($show_links) {
-						$output .= '<a target="_blank" href="https://' . $full_domain . '.datacookbook.com/institution/terms/' . $item->{'term-id'} . '">';
+						$output .= '<a target="_blank" href="' . $full_domain . '/institution/terms/' . $item->{'term-id'} . '">';
 						$output .= '<div class="term_name">' . $item->name . '</div>';
 						$output .= '</a>';
 					} else {
@@ -200,7 +200,7 @@ function display_results($requestType, $full_domain, $result, $show_links) {
 		width: 150px;
 		border: solid;
 		border-radius: 10px;
-		border-color: black;
+		border-color: #273691;
 		background-color: white;
 		color: black;
 		text-align: center;
