@@ -352,8 +352,8 @@ Follow these steps to make use of this viewer:
 				//
 				// FUNCTIONAL DEFINITION
 				//
-				headerTextElement = document.createElement( "p" );
-				headerTextElement.innerHTML = termItem.term_functional_definition;
+				headerTextElement = document.createElement( "div" );
+				headerTextElement.innerHTML = termItem.html_definition;
 				bodyElement.appendChild( headerTextElement );
 			}
 			
@@ -547,6 +547,10 @@ Follow these steps to make use of this viewer:
 				}
 				if ( this.tag != '' ) {
 					URL_OUT += paramPrefix + "tag=" + this.tag;
+					paramPrefix = '&';
+				}
+				if ( this.requestType == 'report_termlist') {
+				  URL_OUT += paramPrefix + "html_definition=" + true;
 					paramPrefix = '&';
 				}
 
